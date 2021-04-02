@@ -1,0 +1,90 @@
+---
+title: "Bitcoin"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+#cargamos las librerías
+library(ggplot2)
+library(dplyr)
+```
+
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+bitcoin <- read.csv("BitcoinHeistData.csv")
+
+head(bitcoin)
+
+summary(bitcoin)
+```
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+bitcoin%>%
+  group_by(label)%>%
+  count()
+```
+
+There are 3 families of Rasomware: Montreal, Padua and Princeton that we are going to group in a label "rasomware" to treat this problem as binary classfication
+
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+bitcoin <- bitcoin%>%
+  mutate(b_label = if_else(label== "white", "noRasomware", "Rasomware"))
+
+```
+
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+bitcoin %>%
+  group_by(b_label) %>%
+  count()
+```
+You can also embed plots, for example:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+which(is.na(bitcoin))
+
+ggplot(data = bitcoin, aes (x=weight, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
+ggplot(data = bitcoin, aes (x=length, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
+ggplot(data = bitcoin, aes (x=count, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
+ggplot(data = bitcoin, aes (x=looped, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
+ggplot(data = bitcoin, aes (x=neighbors, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+#ggplot(bitcoin) + aes(x = b_label, y = income, color=b_label) + geom_jitter()
+
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+new_bitcoin <- sample_n(bitcoin, 10, replace = TRUE)
+
+
+
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+
+bitcoin$ref_date <- paste(as.character(bitcoin$year-1),"-12-31", sep="")
+
+bitcoin$new_date <- as.Date(bitcoin$day, origin= bitcoin$ref_date)
+
+#bitcoin <- bitcoin%>%
+#  mutate(date_ = as.Date(bitcoin$day, origin =bitcoin$ref_date))
+
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+ggplot(data = bitcoin, aes(x=new_date, y= income)) + geom_line() 
+``` 
