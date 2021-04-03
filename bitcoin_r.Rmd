@@ -168,7 +168,7 @@ df$neighbors <- normalize(df$neighbors)
 df$income <- normalize(df$income)
 
 set.seed(100)
-train_index <- createDataPartition(df$new_label, p=0.7, list = FALSE)
+train_index <- createDataPartition(df$new_label, p=0.8, list = FALSE)
 
 train_df <- df[train_index,]
 test_df <- df[-train_index,]
@@ -180,15 +180,15 @@ test_df <- df[-train_index,]
 
 ```{r, echo=TRUE, warning=FALSE, message=FALSE}
 
-set.seed(300)
 
 glm_model <- glm(new_label ~ ., family = binomial, data= train_df)
 summary(glm_model)
 
 glm_pred <- predict(glm_model, test_df, type = "response")
 
-glm_results <- as.factor(ifelse(glm_pred > 0.2, 0, 1), levels =c(0,1))
+roc(test_df$new_label, glm_pred, plot = TRUE, print.auc = TRUE, c1.alpha=TRUE)
 
-confusionMatrix(factor(ifelse(glm_pred>0.8, 1,0), levels=c(0,1)), factor(test_df$new_label))
+confusionMatrix(factor(ifelse(glm_pred>0.025, 1,0), levels=c(0,1)), factor(test_df$new_label))
+
 
 ```
