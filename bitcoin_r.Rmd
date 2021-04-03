@@ -39,17 +39,21 @@ bitcoin <- bitcoin%>%
 
 ```
 
+## EDA
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 
 bitcoin %>%
   group_by(b_label) %>%
   count()
+
+
+ggplot(data = bitcoin, aes(x=b_label, fill= b_label)) + geom_bar(stat = 'count') 
 ```
-You can also embed plots, for example:
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-which(is.na(bitcoin))
+sum(is.na(bitcoin))
+
 
 ggplot(data = bitcoin, aes (x=weight, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
 ggplot(data = bitcoin, aes (x=length, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
@@ -59,18 +63,12 @@ ggplot(data = bitcoin, aes (x=neighbors, color=b_label)) + geom_boxplot() + face
 ```
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-#ggplot(bitcoin) + aes(x = b_label, y = income, color=b_label) + geom_jitter()
-
-```
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-new_bitcoin <- sample_n(bitcoin, 10, replace = TRUE)
-
-
+ggplot(bitcoin) + aes(x = b_label, y = income, color=b_label) + geom_jitter()
 
 ```
+
+
+Transforming day of year into dates
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 
@@ -79,12 +77,38 @@ bitcoin$ref_date <- paste(as.character(bitcoin$year-1),"-12-31", sep="")
 
 bitcoin$new_date <- as.Date(bitcoin$day, origin= bitcoin$ref_date)
 
-#bitcoin <- bitcoin%>%
-#  mutate(date_ = as.Date(bitcoin$day, origin =bitcoin$ref_date))
+
+ggplot(data = bitcoin, aes(x=new_date, y= income)) + geom_line() 
 
 ```
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
+### Outliers
 
-ggplot(data = bitcoin, aes(x=new_date, y= income)) + geom_line() 
+Boxplots of some variables shown the presence of outliers
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+#removing outliers in weight
+weight_out <- boxplot(bitcoin$weight, plot = FALSE)$out
+
+new_bitcoin <- bitcoin
+new_bitcoin <- new_bitcoin[-which(new_bitcoin$weight %in% weight_out),]
+
+ggplot(data = new_bitcoin, aes (x=weight, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
 ``` 
+
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+#remove neighbors outliers
+
+neigh_out <- boxplot(bitcoin$neighbors, plot=FALSE)$out
+
+new_bitcoin <- new_bitcoin[-which(new_bitcoin$neighbors %in% neigh_out),]
+
+ggplot(data = new_bitcoin, aes (x=neighbors, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
+```
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+
+```
+
