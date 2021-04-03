@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(dplyr)
 library(caret)
+library(randomForest)
 ```
 
 
@@ -145,7 +146,7 @@ hist(log(new_bitcoin$neighbors))
 
 ```
 
-## SVM
+## Pre-processing for classification
 
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
@@ -173,10 +174,21 @@ train_df <- df[train_index,]
 test_df <- df[-train_index,]
 
 
-svm_model <- train(new_label ~ ., data = train_df,  method = "svmLinear",
-  trControl = trainControl("cv", number = 10)
-  )
 ```
 
+## Classification
 
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 
+set.seed(300)
+
+glm_model <- glm(new_label ~ ., family = binomial, data= train_df)
+summary(glm_model)
+
+glm_pred <- predict(glm_model, test_df, type = "response")
+
+glm_results <- as.factor(ifelse(glm_pred > 0.2, 0, 1), levels =c(0,1))
+
+confusionMatrix(factor(ifelse(glm_pred>0.8, 1,0), levels=c(0,1)), factor(test_df$new_label))
+
+```
