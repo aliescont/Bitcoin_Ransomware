@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #cargamos las librerías
 library(ggplot2)
 library(dplyr)
+library(caret)
 ```
 
 
@@ -107,8 +108,75 @@ new_bitcoin <- new_bitcoin[-which(new_bitcoin$neighbors %in% neigh_out),]
 
 ggplot(data = new_bitcoin, aes (x=neighbors, color=b_label)) + geom_boxplot() + facet_wrap(~b_label)
 ```
-```{r, echo=TRUE, message=FALSE, warning=FALSE}
 
+### Correlation
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+new_bitcoin$new_label <- if_else(new_bitcoin$b_label == 'Rasomware', 1, 0)
+cor(new_bitcoin[c("length", "weight", "count", "looped", "neighbors", "income")])
 
 ```
+### Normalization
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+par(mfcol=c(2,1))
+hist(new_bitcoin$income)
+hist(log(new_bitcoin$income))
+
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+par(mfcol = c(2,1))
+hist(new_bitcoin$length)
+hist(log(new_bitcoin$length))
+```
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+par(mfcol = c(2,1))
+hist(new_bitcoin$weight)
+hist(log(new_bitcoin$weight))
+```
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+par(mfcol = c(2, 1))
+hist(new_bitcoin$neighbors)
+hist(log(new_bitcoin$neighbors))
+
+```
+
+## SVM
+
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+#https://github.com/dataprofessor/code/blob/master/iris/iris-classification.R
+
+normalize <- function(x){
+  return((x-min(x))/(max(x)-min(x)))
+}
+
+df <- new_bitcoin[c("length", "weight", "count", "looped", "neighbors", "income", "new_label")]
+
+df$income <- log(df$income)
+
+df$length <- normalize(df$length)
+df$weight <- normalize(df$weight)
+df$count <- normalize(df$count)
+df$looped <- normalize(df$looped)
+df$neighbors <- normalize(df$neighbors)
+df$income <- normalize(df$income)
+
+set.seed(100)
+train_index <- createDataPartition(df$new_label, p=0.7, list = FALSE)
+
+train_df <- df[train_index,]
+test_df <- df[-train_index,]
+
+
+svm_model <- train(new_label ~ ., data = train_df,  method = "svmLinear",
+  trControl = trainControl("cv", number = 10)
+  )
+```
+
+
 
