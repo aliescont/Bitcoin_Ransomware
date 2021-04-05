@@ -1,4 +1,4 @@
-# Bitcoin_Rasomware
+# Bitcoin_Ransomware
 
 This project is aim to classify if a bitcoin transaction belongs to a family of Ransomware or not, by using the following dataset. The EDA and model classification is done using R (bitcoin_r.Rmd)
 
